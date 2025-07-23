@@ -1,0 +1,60 @@
+package gift.controller;
+
+import gift.dto.ProductRequestDTO;
+import gift.dto.ProductResponseDTO;
+import gift.service.ProductService;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/products")
+public class ProductController {
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+        List<ProductResponseDTO> products = productService.getAll();
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Integer id) {
+        ProductResponseDTO product = productService.getById(id);
+        return ResponseEntity.ok(product);
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<Page<ProductResponseDTO>> getProductsByPage(
+            @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
+        Page<ProductResponseDTO> products = productService.getPage(pageable);
+        return ResponseEntity.ok(products);
+    }
+
+    @PostMapping
+    public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO product) {
+        ProductResponseDTO created = productService.create(product);
+        return ResponseEntity.ok(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Integer id, @Valid @RequestBody ProductRequestDTO product) {
+        ProductResponseDTO updated = productService.update(id, product);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> deleteProduct(@PathVariable Integer id) {
+        productService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

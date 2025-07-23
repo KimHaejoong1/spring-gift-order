@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Members Management Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" th:href="@{/css/members.css}" />
+</head>
+<body th:data-show-create-modal="${showCreateModal}" th:data-show-update-modal="${showUpdateModal}">
+<button type="button" class="create-btn">회원 추가</button>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>액션</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="m: ${members}">
+        <td th:text="${m.id}">ID</td>
+        <td th:text="${m.email}">Email</td>
+        <td th:text="${m.role}">Role</td>
+        <td>
+            <button type="button"
+                    class="update-btn"
+                    th:attr="data-id=${m.id}, data-email=${m.email}, data-role=${m.role}">수정</button>
+            <button type="button"
+                    class="delete-btn"
+                    th:attr="data-id=${m.id}">삭제</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div id="createModal" class="modal" style="display: none;">
+    <form th:action="@{/admin/members/create}" method="post">
+        <input type="hidden" name="id" id="create-id">
+        <label>Email<input type="text" name="email" id="create-email" th:value="${createFormData != null ? createFormData.email : ''}"></label>
+        <label>Password<input type="password" name="password" id="create-password" th:value="${createFormData != null ? createFormData.password : ''}"></label>
+        <label>Role
+            <select name="role" id="create-role">
+                <option value="USER" th:selected="${createFormData != null and createFormData.role.name() == 'USER'}">USER</option>
+                <option value="ADMIN" th:selected="${createFormData != null and createFormData.role.name() == 'ADMIN'}">ADMIN</option>
+            </select>
+        </label>
+        <div id="createErrorMessage" class="error-message" th:if="${createError}" th:text="${createError}"></div>
+        <button type="submit">추가</button>
+        <button type="button" class="cancel-btn">취소</button>
+    </form>
+</div>
+<div id="updateModal" class="modal" style="display: none;">
+    <form id="updateForm" th:action="@{/admin/members/update}" method="post">
+        <input type="hidden" name="id" id="update-id" th:value="${updateId}">
+        <label>Email<input type="text" name="email" id="update-email" th:value="${updateFormData != null  ? updateFormData.email : ''}"></label>
+        <label>Password<input type="password" name="password" id="update-password" th:value="${updateFormData != null ? updateFormData.password : ''}"></label>
+        <label>Role
+            <select name="role" id="update-role">
+                <option value="USER" th:selected="${createFormData != null and createFormData.role.name() == 'USER'}">USER</option>
+                <option value="ADMIN" th:selected="${createFormData != null and createFormData.role.name() == 'ADMIN'}">ADMIN</option>
+            </select>
+        </label>
+        <div id="updateErrorMessage" class="error-message" th:if="${updateError}" th:text="${updateError}"> </div>
+        <button type="submit">저장</button>
+        <button type="button" class="cancel-btn">취소</button>
+    </form>
+</div>
+<div id="deleteModal" class="modal" style="display: none;">
+    <form id="deleteForm" th:action="@{/admin/members/delete}" method="post">
+        <input type="hidden" name="id" id="delete-id">
+        <p>삭제하시겠습니까?</p>
+        <button type="submit">삭제</button>
+        <button type="button" class="cancel-btn">취소</button>
+    </form>
+</div>
+<script th:src="@{/js/members.js}"></script>
+</body>
+</html>
