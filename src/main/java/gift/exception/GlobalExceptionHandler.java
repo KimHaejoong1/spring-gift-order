@@ -8,9 +8,25 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ResponseEntity<String> handleHttpClientErrorException(HttpClientErrorException e){
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(HttpServerErrorException.class)
+    public ResponseEntity<String> handleHttpServerErrorException(HttpServerErrorException e){
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(e.getMessage());
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<String> ResourceNotFoundException(ResourceNotFoundException e) {
         return ResponseEntity
