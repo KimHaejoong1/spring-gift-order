@@ -22,6 +22,7 @@ public class OrderControllerE2ETest {
 
     private String authToken;
     private Integer optionId;
+    private Integer productId;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +32,7 @@ public class OrderControllerE2ETest {
 
         ProductRequestDTO productRequest = new ProductRequestDTO("휠렛버거", BigInteger.valueOf(5000), "https://example.com/image.jpg");
         ResponseEntity<ProductResponseDTO> productResponse = restTemplate.postForEntity("/api/products", productRequest, ProductResponseDTO.class);
-        Integer productId = productResponse.getBody().id();
+        productId = productResponse.getBody().id();
 
         OptionRequestDTO optionRequest = new OptionRequestDTO("기본옵션", 10);
         ResponseEntity<OptionResponseDTO> optionResponse = restTemplate.postForEntity("/api/products/" + productId + "/options", optionRequest, OptionResponseDTO.class);
@@ -92,5 +93,43 @@ public class OrderControllerE2ETest {
         ResponseEntity<String> response = restTemplate.exchange("/api/orders", HttpMethod.POST, httpEntity, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void createOrder_success_and_decrease_option_quantity() {
+        ResponseEntity<OptionResponseDTO[]> optionsResponse = restTemplate.getForEntity("/api/products/" + productId + "/options", OptionResponseDTO[].class);
+        int initialQuantity = optionsResponse.getBody()[0].quantity();
+        assertThat(initialQuantity).isEqualTo(10);
+
+        OrderRequestDTO request = new OrderRequestDTO(optionId, 2, "test message");
+        HttpEntity<OrderRequestDTO> httpEntity = new HttpEntity<>(request, createAuthHeaders());
+        ResponseEntity<OrderResponseDTO> response = restTemplate.exchange("/api/orders", HttpMethod.POST, httpEntity, OrderResponseDTO.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        ResponseEntity<OptionResponseDTO[]> updatedOptionsResponse = restTemplate.getForEntity("/api/products/" + productId + "/options", OptionResponseDTO[].class);
+        int updatedQuantity = updatedOptionsResponse.getBody()[0].quantity();
+        assertThat(updatedQuantity).isEqualTo(8);
+    }
+
+    @Test
+    void createOrder_failed_insufficient_stock() {
+        OrderRequestDTO request = new OrderRequestDTO(optionId, 15, "test message");
+        HttpEntity<OrderRequestDTO> httpEntity = new HttpEntity<>(request, createAuthHeaders());
+
+        ResponseEntity<String> response = restTemplate.exchange("/api/orders", HttpMethod.POST, httpEntity, String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("재고가 부족합니다");
+    }
+
+    @Test
+    void createOrder_failed_option_not_found() {
+        OrderRequestDTO request = new OrderRequestDTO(999, 2, "test message");
+        HttpEntity<OrderRequestDTO> httpEntity = new HttpEntity<>(request, createAuthHeaders());
+
+        ResponseEntity<String> response = restTemplate.exchange("/api/orders", HttpMethod.POST, httpEntity, String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("옵션을 찾을 수 없습니다");
     }
 }
