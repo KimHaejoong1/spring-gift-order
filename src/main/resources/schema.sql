@@ -15,7 +15,8 @@ CREATE TABLE member (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password varchar(255) NOT NULL,
-    role VARCHAR(30) DEFAULT 'USER' NOT NULL
+    role VARCHAR(30) DEFAULT 'USER' NOT NULL,
+    kakao_access_token VARCHAR(500)
 );
 
 CREATE TABLE wishlist (
