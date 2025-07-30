@@ -27,7 +27,7 @@ public class OrderController {
             @LoginMember AuthenticatedMemberDTO memberDTO,
             @Valid @RequestBody OrderRequestDTO requestDTO
     ) {
-        OrderResponseDTO response = orderService.createOrder(requestDTO);
+        OrderResponseDTO response = orderService.createOrder(requestDTO, memberDTO.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);

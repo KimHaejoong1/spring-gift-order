@@ -132,4 +132,69 @@ public class OrderControllerE2ETest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).contains("옵션을 찾을 수 없습니다");
     }
+
+    @Test
+    void createOrder_remove_from_wishlist() {
+        WishlistRequestDTO wishlistRequest = new WishlistRequestDTO(productId, 1);
+        HttpEntity<WishlistRequestDTO> wishlistEntity = new HttpEntity<>(wishlistRequest, createAuthHeaders());
+        ResponseEntity<WishlistResponseDTO> wishlistResponse = restTemplate.exchange("/api/wishlist", HttpMethod.POST, wishlistEntity, WishlistResponseDTO.class);
+
+        assertThat(wishlistResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WishlistResponseDTO[]> beforeWishlist = restTemplate.exchange("/api/wishlist", HttpMethod.GET, new HttpEntity<>(createAuthHeaders()), WishlistResponseDTO[].class);
+        assertThat(beforeWishlist.getBody()).hasSize(1);
+        assertThat(beforeWishlist.getBody()[0].productId()).isEqualTo(productId);
+
+        OrderRequestDTO orderRequest = new OrderRequestDTO(optionId, 2, "Please remove from wishlist");
+        HttpEntity<OrderRequestDTO> orderEntity = new HttpEntity<>(orderRequest, createAuthHeaders());
+        ResponseEntity<OrderResponseDTO> orderResponse = restTemplate.exchange("/api/orders", HttpMethod.POST, orderEntity, OrderResponseDTO.class);
+
+        assertThat(orderResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WishlistResponseDTO[]> afterWishlist = restTemplate.exchange("/api/wishlist", HttpMethod.GET, new HttpEntity<>(createAuthHeaders()), WishlistResponseDTO[].class);
+        assertThat(afterWishlist.getBody()).hasSize(0);
+    }
+
+    @Test
+    void createOrder_no_wishlist_to_remove() {
+        ResponseEntity<WishlistResponseDTO[]> beforeWishlist = restTemplate.exchange("/api/wishlist", HttpMethod.GET, new HttpEntity<>(createAuthHeaders()), WishlistResponseDTO[].class);
+        assertThat(beforeWishlist.getBody()).hasSize(0);
+
+        OrderRequestDTO orderRequest = new OrderRequestDTO(optionId, 2, "No wishlist item to remove");
+        HttpEntity<OrderRequestDTO> orderEntity = new HttpEntity<>(orderRequest, createAuthHeaders());
+        ResponseEntity<OrderResponseDTO> orderResponse = restTemplate.exchange("/api/orders", HttpMethod.POST, orderEntity, OrderResponseDTO.class);
+
+        assertThat(orderResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WishlistResponseDTO[]> afterWishlist = restTemplate.exchange("/api/wishlist", HttpMethod.GET, new HttpEntity<>(createAuthHeaders()), WishlistResponseDTO[].class);
+        assertThat(afterWishlist.getBody()).hasSize(0);
+    }
+
+    @Test
+    void createOrder_remove_only_matching_product_from_wishlist() {
+        WishlistRequestDTO wishlistRequest1 = new WishlistRequestDTO(productId, 1);
+        HttpEntity<WishlistRequestDTO> wishlistEntity1 = new HttpEntity<>(wishlistRequest1, createAuthHeaders());
+        restTemplate.exchange("/api/wishlist", HttpMethod.POST, wishlistEntity1, WishlistResponseDTO.class);
+
+        ProductRequestDTO anotherProductRequest = new ProductRequestDTO("딥치즈버거", BigInteger.valueOf(5500), "https://example.com/other.jpg");
+        ResponseEntity<ProductResponseDTO> anotherProductResponse = restTemplate.postForEntity("/api/products", anotherProductRequest, ProductResponseDTO.class);
+        Integer anotherProductId = anotherProductResponse.getBody().id();
+
+        WishlistRequestDTO wishlistRequest2 = new WishlistRequestDTO(anotherProductId, 2);
+        HttpEntity<WishlistRequestDTO> wishlistEntity2 = new HttpEntity<>(wishlistRequest2, createAuthHeaders());
+        restTemplate.exchange("/api/wishlist", HttpMethod.POST, wishlistEntity2, WishlistResponseDTO.class);
+
+        ResponseEntity<WishlistResponseDTO[]> beforeWishlist = restTemplate.exchange("/api/wishlist", HttpMethod.GET, new HttpEntity<>(createAuthHeaders()), WishlistResponseDTO[].class);
+        assertThat(beforeWishlist.getBody()).hasSize(2);
+
+        OrderRequestDTO orderRequest = new OrderRequestDTO(optionId, 1, "Remove only first product");
+        HttpEntity<OrderRequestDTO> orderEntity = new HttpEntity<>(orderRequest, createAuthHeaders());
+        ResponseEntity<OrderResponseDTO> orderResponse = restTemplate.exchange("/api/orders", HttpMethod.POST, orderEntity, OrderResponseDTO.class);
+
+        assertThat(orderResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WishlistResponseDTO[]> afterWishlist = restTemplate.exchange("/api/wishlist", HttpMethod.GET, new HttpEntity<>(createAuthHeaders()), WishlistResponseDTO[].class);
+        assertThat(afterWishlist.getBody()).hasSize(1);
+        assertThat(afterWishlist.getBody()[0].productId()).isEqualTo(anotherProductId);
+    }
 }
