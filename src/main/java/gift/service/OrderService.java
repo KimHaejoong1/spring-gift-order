@@ -20,14 +20,16 @@ public class OrderService {
     private final ProductService productService;
     private final OptionRepository optionRepository;
     private final WishlistRepository wishlistRepository;
+    private final KakaoMessageService kakaoMessageService;
 
-    public OrderService(OrderRepository orderRepository, OptionService optionService, MemberService memberService, ProductService productService, OptionRepository optionRepository, WishlistRepository wishlistRepository) {
+    public OrderService(OrderRepository orderRepository, OptionService optionService, MemberService memberService, ProductService productService, OptionRepository optionRepository, WishlistRepository wishlistRepository, KakaoMessageService kakaoMessageService) {
         this.orderRepository = orderRepository;
         this.optionService = optionService;
         this.memberService = memberService;
         this.productService = productService;
         this.optionRepository = optionRepository;
         this.wishlistRepository = wishlistRepository;
+        this.kakaoMessageService = kakaoMessageService;
     }
 
     @Transactional
@@ -50,6 +52,15 @@ public class OrderService {
 
         Optional<WishList> wishList = wishlistRepository.findByMemberAndProduct(member, product);
         wishList.ifPresent(wishlistRepository::delete);
+
+        String kakaoAccessToken = member.getKakaoAccessToken();
+        if (kakaoAccessToken != null) {
+            try {
+                kakaoMessageService.sendOrderMessage(created, product, option, kakaoAccessToken);
+            } catch (Exception e) {
+                System.err.println("카카오톡 전송 실패: " + e.getMessage());
+            }
+        }
 
         return new OrderResponseDTO(
                 created.getId(),
