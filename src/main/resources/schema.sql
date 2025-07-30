@@ -43,4 +43,4 @@ CREATE TABLE orders (
     order_date_time TIMESTAMP NOT NULL,
     message VARCHAR(100),
     FOREIGN KEY (option_id) REFERENCES option(id)
-)
+);
