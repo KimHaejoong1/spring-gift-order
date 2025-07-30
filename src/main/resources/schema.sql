@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS wishlist;
 DROP TABLE IF EXISTS option;
 DROP TABLE IF EXISTS product;
@@ -34,3 +35,12 @@ CREATE TABLE option (
     product_id INTEGER,
     FOREIGN KEY (product_id) REFERENCES product(id)
 );
+
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    option_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    order_date_time TIMESTAMP NOT NULL,
+    message VARCHAR(100),
+    FOREIGN KEY (option_id) REFERENCES option(id)
+)
