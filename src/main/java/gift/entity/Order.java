@@ -26,6 +26,9 @@ public class Order {
     protected Order() {}
 
     public Order(Integer optionId, Integer quantity, String message) {
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("수량은 1개 이상이어야 합니다.");
+        }
         this.optionId = optionId;
         this.quantity = quantity;
         this.orderDateTime = LocalDateTime.now();
