@@ -38,14 +38,14 @@ public class OrderService {
         Integer quantity = orderRequestDTO.quantity();
         String message = orderRequestDTO.message();
 
+        Option option = optionRepository.findById(optionId)
+                .orElseThrow(() -> new IllegalArgumentException("옵션을 찾을 수 없습니다."));
+        Integer productId = option.getProduct().getId();
+
         optionService.subtractQuantity(optionId, quantity);
 
         Order order = new Order(optionId, quantity, message);
         Order created = orderRepository.save(order);
-
-        Option option = optionRepository.findById(optionId)
-                .orElseThrow(() -> new IllegalArgumentException("옵션을 찾을 수 없습니다."));
-        Integer productId = option.getProduct().getId();
 
         Member member = memberService.getMemberEntityById(memberId);
         Product product = productService.getEntityById(productId);
