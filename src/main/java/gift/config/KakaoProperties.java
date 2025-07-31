@@ -7,5 +7,6 @@ public record KakaoProperties(
         String restApiKey,
         String redirectUri,
         String tokenUri,
-        String loginUrl
+        String loginUrl,
+        String messageApiUrl
 ) {}

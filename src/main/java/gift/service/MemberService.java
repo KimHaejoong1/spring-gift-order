@@ -126,4 +126,11 @@ public class MemberService {
         }
         memberRepository.deleteById(id);
     }
+
+    @Transactional
+    public void updateKakaoAccessToken(Integer id, String kakaoAccessToken) {
+        Member member = getMemberEntityById(id);
+        member.updateKakaoAccessToken(kakaoAccessToken);
+        memberRepository.save(member);
+    }
 }

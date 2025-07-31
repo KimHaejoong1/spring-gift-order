@@ -19,6 +19,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "kakao_access_token", length = 500)
+    private String kakaoAccessToken;
+
     protected Member() {}
 
     public Member(String email, String password, Role role) {
@@ -38,4 +41,9 @@ public class Member {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public Role getRole() { return role; }
+    public String getKakaoAccessToken() { return kakaoAccessToken; }
+
+    public void updateKakaoAccessToken(String kakaoAccessToken) {
+        this.kakaoAccessToken = kakaoAccessToken;
+    }
 }

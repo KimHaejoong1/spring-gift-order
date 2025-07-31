@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS wishlist;
 DROP TABLE IF EXISTS option;
 DROP TABLE IF EXISTS product;
@@ -14,7 +15,8 @@ CREATE TABLE member (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password varchar(255) NOT NULL,
-    role VARCHAR(30) DEFAULT 'USER' NOT NULL
+    role VARCHAR(30) DEFAULT 'USER' NOT NULL,
+    kakao_access_token VARCHAR(500)
 );
 
 CREATE TABLE wishlist (
@@ -33,4 +35,13 @@ CREATE TABLE option (
     quantity INTEGER NOT NULL,
     product_id INTEGER,
     FOREIGN KEY (product_id) REFERENCES product(id)
+);
+
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    option_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    order_date_time TIMESTAMP NOT NULL,
+    message VARCHAR(100),
+    FOREIGN KEY (option_id) REFERENCES option(id)
 );
