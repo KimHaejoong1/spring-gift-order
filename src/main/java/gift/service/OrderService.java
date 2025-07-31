@@ -55,11 +55,7 @@ public class OrderService {
 
         String kakaoAccessToken = member.getKakaoAccessToken();
         if (kakaoAccessToken != null) {
-            try {
-                kakaoMessageService.sendOrderMessage(created, product, option, kakaoAccessToken);
-            } catch (Exception e) {
-                System.err.println("카카오톡 전송 실패: " + e.getMessage());
-            }
+            kakaoMessageService.sendOrderMessage(created, product, option, kakaoAccessToken);
         }
 
         return new OrderResponseDTO(
