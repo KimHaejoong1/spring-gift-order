@@ -1,5 +1,6 @@
 package gift.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.config.KakaoProperties;
 import gift.dto.KakaoMessageRequestDTO;
@@ -11,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.http.RequestEntity;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -53,29 +53,28 @@ public class KakaoMessageService {
                 product.getName(),
                 option.getName(),
                 order.getQuantity(),
-                order.getOrderDateTime().toString(),
                 order.getMessage() != null ? order.getMessage() : " "
             );
 
             Map<String, Object> template = new HashMap<>();
             template.put("object_type", "feed");
-            
+
             Map<String, Object> content = new HashMap<>();
             content.put("title", "선물을 보냈어요");
             content.put("description", description);
             content.put("image_url", product.getImageUrl());
             content.put("image_width", 640);
             content.put("image_height", 640);
-            
+
             Map<String, String> link = new HashMap<>();
             link.put("web_url", "http://localhost:8080");
             link.put("mobile_web_url", "http://localhost:8080");
             content.put("link", link);
-            
+
             template.put("content", content);
 
             return objectMapper.writeValueAsString(template);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON 생성 실패", e);
         }
     }
