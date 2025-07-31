@@ -2,6 +2,7 @@ package gift.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.config.KakaoProperties;
+import gift.dto.KakaoMessageRequestDTO;
 import gift.entity.Option;
 import gift.entity.Order;
 import gift.entity.Product;
@@ -36,12 +37,12 @@ public class KakaoMessageService {
 
         String templateObject = createOrderMessageTemplate(order, product, option);
 
-        var body = new LinkedMultiValueMap<String, String>();
-        body.add("template_object", templateObject);
+        var requestDto = new KakaoMessageRequestDTO(templateObject);
+        var body = requestDto.toMultiValueMap();
 
         var request = new RequestEntity<>(body, headers, HttpMethod.POST, URI.create(kakaoProperties.messageApiUrl()));
         
-        var response = restTemplate.exchange(request, String.class);
+        restTemplate.exchange(request, void.class);
     }
 
     private String createOrderMessageTemplate(Order order, Product product, Option option) {
