@@ -41,3 +41,6 @@ out/
 
 ### Kakao API Key ###
 application-local.properties
+
+### deploy directory ###
+/deploy/
