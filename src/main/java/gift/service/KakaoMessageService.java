@@ -37,7 +37,7 @@ public class KakaoMessageService {
     public void sendOrderMessage(Order order, Product product, Option option, String accessToken) {
         String templateObject = createOrderMessageTemplate(order, product, option);
         if (templateObject == null) {
-            return;
+            logger.error("카카오톡 전송 실패");
         }
 
         var headers = new HttpHeaders();
